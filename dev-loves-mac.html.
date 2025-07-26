@@ -2,58 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dev Loves Mac!</title>
+  <title>Dev's Candy Love for Mac 💖</title>
   <style>
     body {
-      font-family: 'Comic Sans MS', cursive;
-      background: pink;
+      font-family: Arial, sans-serif;
+      background-color: #ffdce0;
       text-align: center;
-      padding: 20px;
     }
     h1 {
-      color: red;
+      color: #ff2e63;
     }
     #score {
-      font-size: 24px;
-      color: darkred;
+      font-size: 22px;
       margin: 10px;
+      color: #ff2e63;
     }
     #grid {
       display: grid;
       grid-template-columns: repeat(8, 50px);
       grid-template-rows: repeat(8, 50px);
+      margin: 0 auto;
       gap: 2px;
-      margin: 20px auto;
-      width: 420px;
     }
     .tile {
       width: 50px;
       height: 50px;
-      border-radius: 10px;
+      border-radius: 8px;
+      border: 2px solid white;
+      box-shadow: 0 0 5px #888;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>💖 Dev Loves Mac Lenar Bringuela 💖</h1>
+  <h1>Dev 💖 Mac Lenar Bringuela</h1>
   <div id="score">Score: 0</div>
   <div id="grid"></div>
 
   <script>
-    const grid = document.getElementById('grid');
-    const scoreDisplay = document.getElementById('score');
-    const colors = ['red', 'yellow', 'blue', 'green', 'purple', 'orange'];
+    const grid = document.getElementById("grid");
+    const scoreDisplay = document.getElementById("score");
     const width = 8;
+    const colors = ['red', 'yellow', 'blue', 'green', 'purple', 'orange'];
     let squares = [];
     let score = 0;
 
-    // Create board
+    // Create the board
     function createBoard() {
       for (let i = 0; i < width * width; i++) {
-        const square = document.createElement('div');
-        square.setAttribute('draggable', true);
-        square.setAttribute('id', i);
-        square.classList.add('tile');
+        const square = document.createElement("div");
+        square.setAttribute("draggable", true);
+        square.setAttribute("id", i);
+        square.classList.add("tile");
         let randomColor = colors[Math.floor(Math.random() * colors.length)];
         square.style.backgroundColor = randomColor;
         grid.appendChild(square);
@@ -65,16 +65,21 @@
 
     let colorBeingDragged, colorBeingReplaced, squareIdBeingDragged, squareIdBeingReplaced;
 
-    squares.forEach(square => square.addEventListener('dragstart', dragStart));
-    squares.forEach(square => square.addEventListener('dragend', dragEnd));
-    squares.forEach(square => square.addEventListener('dragover', e => e.preventDefault()));
-    squares.forEach(square => square.addEventListener('dragenter', e => e.preventDefault()));
-    squares.forEach(square => square.addEventListener('drop', dragDrop));
+    squares.forEach(square => {
+      square.addEventListener('dragstart', dragStart);
+      square.addEventListener('dragover', e => e.preventDefault());
+      square.addEventListener('dragenter', e => e.preventDefault());
+      square.addEventListener('dragleave', dragLeave);
+      square.addEventListener('drop', dragDrop);
+      square.addEventListener('dragend', dragEnd);
+    });
 
     function dragStart() {
       colorBeingDragged = this.style.backgroundColor;
       squareIdBeingDragged = parseInt(this.id);
     }
+
+    function dragLeave() {}
 
     function dragDrop() {
       colorBeingReplaced = this.style.backgroundColor;
@@ -84,48 +89,57 @@
     }
 
     function dragEnd() {
-      let validMoves = [
+      const validMoves = [
         squareIdBeingDragged - 1,
-        squareIdBeingDragged - width,
         squareIdBeingDragged + 1,
+        squareIdBeingDragged - width,
         squareIdBeingDragged + width
       ];
-      let validMove = validMoves.includes(squareIdBeingReplaced);
+      const isValidMove = validMoves.includes(squareIdBeingReplaced);
 
-      if (squareIdBeingReplaced && validMove) {
+      if (squareIdBeingReplaced && isValidMove) {
         squareIdBeingReplaced = null;
-      } else {
+        checkMatches();
+      } else if (squareIdBeingReplaced && !isValidMove) {
         squares[squareIdBeingDragged].style.backgroundColor = colorBeingDragged;
         squares[squareIdBeingReplaced].style.backgroundColor = colorBeingReplaced;
       }
     }
 
+    function checkMatches() {
+      checkRowForThree();
+      checkColumnForThree();
+    }
+
     function checkRowForThree() {
-      for (let i = 0; i < 61; i++) {
-        let rowOfThree = [i, i+1, i+2];
-        let decidedColor = squares[i].style.backgroundColor;
-        const notValid = [6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55];
+      for (let i = 0; i < 64; i++) {
+        const rowOfThree = [i, i+1, i+2];
+        const notValid = [6,7,14,15,22,23,30,31,38,39,46,47,54,55,62,63];
         if (notValid.includes(i)) continue;
+
+        const decidedColor = squares[i].style.backgroundColor;
         if (rowOfThree.every(index => squares[index].style.backgroundColor === decidedColor)) {
           rowOfThree.forEach(index => squares[index].style.backgroundColor = '');
-          score += 3;
-          scoreDisplay.innerHTML = `Score: ${score}`;
-          alert(`Dev loves Mac Lenar Bringuela this much: ${score} points! 💖`);
+          updateScore(3);
         }
       }
     }
 
     function checkColumnForThree() {
-      for (let i = 0; i < 47; i++) {
-        let columnOfThree = [i, i+width, i+width*2];
-        let decidedColor = squares[i].style.backgroundColor;
+      for (let i = 0; i < 40; i++) {
+        const columnOfThree = [i, i+width, i+width*2];
+        const decidedColor = squares[i].style.backgroundColor;
         if (columnOfThree.every(index => squares[index].style.backgroundColor === decidedColor)) {
           columnOfThree.forEach(index => squares[index].style.backgroundColor = '');
-          score += 3;
-          scoreDisplay.innerHTML = `Score: ${score}`;
-          alert(`Dev loves Mac Lenar Bringuela this much: ${score} points! 💖`);
+          updateScore(3);
         }
       }
+    }
+
+    function updateScore(points) {
+      score += points;
+      scoreDisplay.textContent = `Score: ${score}`;
+      alert(`Dev loves Mac Lenar Bringuela this much: ${score} points! 💖`);
     }
 
     function moveDown() {
@@ -143,11 +157,10 @@
       }
     }
 
-    window.setInterval(function() {
+    setInterval(() => {
       moveDown();
-      checkRowForThree();
-      checkColumnForThree();
-    }, 100);
+      checkMatches();
+    }, 200);
   </script>
 </body>
 </html>
